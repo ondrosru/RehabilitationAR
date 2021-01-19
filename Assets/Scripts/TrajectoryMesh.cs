@@ -4,16 +4,19 @@ using UnityEngine;
 public class TrajectoryMesh : MonoBehaviour
 {
     private int POINT_COUNT = 15;
-    private float MAX_RADIUS = 1;
+    private float MAX_RADIUS = 1f;
     private float MIN_RADIUS = 0.4f;
     private int NUMBER_HEMISPHERES = 5;
-    private float MAX_RADIUS_BALL = 15;
-    private float MIN_RADIUS_BALL = 5;
+    private float MAX_RADIUS_BALL = 12;
+    private float MIN_RADIUS_BALL = 8;
     private List<Vector3> positionBalls = new List<Vector3>();
     List<GameObject> balls = new List<GameObject>();
     public GameObject _containerBalls;
     private int BALLS_COUNT = 15;
     private System.Random rand = new System.Random();
+    public Counter counter;
+    public Color ballColor;
+    public Material materialBall;
     enum directionArc
     {
         horizontal,
@@ -25,13 +28,14 @@ public class TrajectoryMesh : MonoBehaviour
         for (int i = 0; i < NUMBER_HEMISPHERES; i++)
         {
             List<List<Vector3>> meshPoints = GetMeshPoints(new Vector3(0, 0, 0), MAX_RADIUS - stepRadius * i);
-            RenderMesh(meshPoints);
-            Debug.Log(positionBalls.Count);
+            //RenderMesh(meshPoints);
         }
         for (int i = 0; i < BALLS_COUNT; i++)
         {
-            AddBall();
+            AddBall(positionBalls);
         }
+        GameObject.Find("ImageTarget").GetComponent<TargeringBall>().targets = balls;
+        counter.SetCount(balls.Count);
     }
 
     List<List<Vector3>> GetMeshPoints(Vector3 pos, float radius)
@@ -60,22 +64,19 @@ public class TrajectoryMesh : MonoBehaviour
         return meshPoints;
     }
 
-    private void AddBall()
+    private void AddBall(List<Vector3> positions)
     {
         GameObject ball = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         float radius = GetRandomFloat(MIN_RADIUS_BALL, MAX_RADIUS_BALL);
         ball.transform.localScale = new Vector3(radius, radius, radius);
-        Debug.Log(positionBalls.Count);
-        int index = rand.Next(0, positionBalls.Count);
-        Vector3 pos = positionBalls[index];
-        positionBalls.RemoveAt(index);
+        int index = rand.Next(0, positions.Count);
+        Vector3 pos = positions[index];
+        positions.RemoveAt(index);
         ball.name = "Ball-" + balls.Count;
-        if (balls.Count == 0)
-        {
-            ball.AddComponent<TargeringBall>();
-        }
         ball.transform.position = new Vector3(pos.x * 100, pos.y * 100, pos.z * 100);
         ball.transform.parent = _containerBalls.transform;
+        ball.GetComponent<Renderer>().material = materialBall;
+        ball.GetComponent<Renderer>().material.SetColor("_Color", ballColor);
         balls.Add(ball);
     }
     private List<Vector3> GetArcPoint(float radius, Vector3 position, directionArc direction)
@@ -120,5 +121,10 @@ public class TrajectoryMesh : MonoBehaviour
     public float GetRandomFloat(float minimum, float maximum)
     {
         return (float)rand.NextDouble() * (maximum - minimum) + minimum;
+    }
+
+    public void RemoveBall(GameObject ball)
+    {
+        balls.Remove(ball);
     }
 }

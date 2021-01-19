@@ -56,7 +56,7 @@ MonoBehaviour:
   deviceTracker:
     autoInitTracker: 1
     autoStartTracker: 1
-    arcoreRequirement: 1
+    arcoreRequirement: 2
     trackingMode: 1
     posePrediction: 0
     modelCorrectionMode: 0
